@@ -19,7 +19,6 @@ namespace WordList
             Console.ReadLine();
             Console.WriteLine("This program removes any character that isn't a letter or a digit. Please list any non letter or digit you would like to appear. Please note that adding things like periods or commas may lead to unwanted results. If there is nothing you want whitelisted please just press Enter to continue.");
             var punctuation = Console.ReadLine();
-            Console.WriteLine(punctuation);
             var count = 1;
             var word = new List<string>();
             var duplicate = new List<int>();
@@ -33,7 +32,7 @@ namespace WordList
                 all = DecodeQuotedPrintables(all);
 
                 if (string.IsNullOrEmpty(punctuation))
-                    all = new string(all.Where(c => !char.IsPunctuation(c)).ToArray());
+                    all = new string(all.Where(c => !char.IsPunctuation(c)).ToArray()).Replace("<", "").Replace(">", "");
 
                 else
                 {
@@ -46,7 +45,8 @@ namespace WordList
                         {
                             if (punctuation.Contains("."))
                             {
-                                if((counthelper != all.Length && counthelper < all.Length) && !string.IsNullOrEmpty(all[all.IndexOf(sb.ToString())+2].ToString()))
+                                if ((counthelper != all.Length && counthelper < all.Length) &&
+                                    !string.IsNullOrEmpty(all[all.IndexOf(sb.ToString()) + 2].ToString()))
                                 {
                                     sb.Append(c);
                                 }
@@ -57,11 +57,14 @@ namespace WordList
                                     if (reverse.ToString().IndexOf("@") < reverse.ToString().IndexOf(" "))
                                         sb.Append(c);
                                 }
+
                             }
                             else
                                 sb.Append(c);
 
                         }
+                        else if (c.ToString() == "<" || c.ToString() == ">")
+                        { }
 
                         else if (!char.IsPunctuation(c))
                             sb.Append(c);
@@ -84,6 +87,8 @@ namespace WordList
                         if (!temp[i].Contains("<"))
                             temp[i] = temp[i].Replace(">", "");
                     }
+                    if (temp[i] == "")
+                        continue;
 
                     if (word.Count == 0)
                     {
