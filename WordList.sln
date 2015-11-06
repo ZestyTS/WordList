@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordList", "WordList\WordList.csproj", "{ED7233EB-6132-402F-80B1-9390A909FA5D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordList", "WordList\WordList.csproj", "{C47422BE-7691-4DFB-9B4F-21D5DAB5F6FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ED7233EB-6132-402F-80B1-9390A909FA5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ED7233EB-6132-402F-80B1-9390A909FA5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ED7233EB-6132-402F-80B1-9390A909FA5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ED7233EB-6132-402F-80B1-9390A909FA5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C47422BE-7691-4DFB-9B4F-21D5DAB5F6FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C47422BE-7691-4DFB-9B4F-21D5DAB5F6FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C47422BE-7691-4DFB-9B4F-21D5DAB5F6FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C47422BE-7691-4DFB-9B4F-21D5DAB5F6FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
