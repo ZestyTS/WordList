@@ -11,7 +11,7 @@ namespace WindowsFormsApplication1
 {
     public partial class Form2 : Form
     {
-        public string[] files;
+        public List<string> files = new List<string>();
         public Form2()
         {
             InitializeComponent();
@@ -52,7 +52,7 @@ namespace WindowsFormsApplication1
 
         private void lbDragDrop(object sender, DragEventArgs e)
         {
-            files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            files.AddRange((string[]) e.Data.GetData(DataFormats.FileDrop));
             foreach (var file in files.Where(file => !listBox1.Items.Contains(file)))
                 listBox1.Items.Add(file);
             label3.Text = listBox1.Items.Count + @" Files to Use";
@@ -65,7 +65,7 @@ namespace WindowsFormsApplication1
                 MessageBox.Show(@"Please add files before clicking this button");
                 return;
             }
-
+            files = files.Distinct().ToList();
             ButtonSwap(true);
             var punctuation = textBox1.Text;
             var count = 1;
@@ -158,7 +158,7 @@ namespace WindowsFormsApplication1
                     }
                 }
 
-                listBox2.Items.Add("Currently on file " + count + " of " + files.Length);
+                listBox2.Items.Add("Currently on file " + count + " of " + files.Count);
                 count++;
             }
 
@@ -186,7 +186,7 @@ namespace WindowsFormsApplication1
             listBox1.Items.Clear();
             label3.Text = @"Files to Use";
             textBox1.Text = "";
-            Array.Clear(files, 0, files.Length);
+            files.Clear();
         }
 
         private static string DecodeQuotedPrintables(string input)
@@ -226,5 +226,11 @@ namespace WindowsFormsApplication1
             label4.Visible = start;
         }
 
+        private void button5_Click(object sender, EventArgs e)
+        {
+            files.AddRange(Directory.GetFiles(Environment.CurrentDirectory, "*.txt"));
+            foreach (var file in files.Where(file => !listBox1.Items.Contains(file)))
+                listBox1.Items.Add(file);
+        }
     }
 }

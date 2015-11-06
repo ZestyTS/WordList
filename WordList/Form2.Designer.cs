@@ -40,6 +40,7 @@
             this.listBox2 = new System.Windows.Forms.ListBox();
             this.button4 = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
+            this.button5 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -56,7 +57,7 @@
             this.listBox1.HorizontalScrollbar = true;
             this.listBox1.Location = new System.Drawing.Point(31, 121);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(309, 186);
+            this.listBox1.Size = new System.Drawing.Size(309, 173);
             this.listBox1.TabIndex = 1;
             // 
             // label3
@@ -118,15 +119,15 @@
             // 
             this.listBox2.Enabled = false;
             this.listBox2.FormattingEnabled = true;
-            this.listBox2.Location = new System.Drawing.Point(232, 366);
+            this.listBox2.Location = new System.Drawing.Point(232, 418);
             this.listBox2.Name = "listBox2";
-            this.listBox2.Size = new System.Drawing.Size(306, 199);
+            this.listBox2.Size = new System.Drawing.Size(306, 147);
             this.listBox2.TabIndex = 9;
             this.listBox2.Visible = false;
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(447, 230);
+            this.button4.Location = new System.Drawing.Point(447, 256);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(287, 77);
             this.button4.TabIndex = 10;
@@ -137,18 +138,30 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(362, 350);
+            this.label4.Location = new System.Drawing.Point(361, 402);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(39, 13);
             this.label4.TabIndex = 11;
             this.label4.Text = "Output";
             this.label4.Visible = false;
             // 
+            // button5
+            // 
+            this.button5.AutoSize = true;
+            this.button5.Location = new System.Drawing.Point(64, 310);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(234, 23);
+            this.button5.TabIndex = 12;
+            this.button5.Text = "Add .txt Files From Program\'s Current Directory";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(765, 577);
+            this.Controls.Add(this.button5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.listBox2);
@@ -181,5 +194,6 @@
         private System.Windows.Forms.ListBox listBox2;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button button5;
     }
 }
