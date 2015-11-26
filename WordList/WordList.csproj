@@ -47,11 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="frmProgramLauncher.cs">
+    <Compile Include="ProgramLauncher.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmProgramLauncher.Designer.cs">
-      <DependentUpon>frmProgramLauncher.cs</DependentUpon>
+    <Compile Include="ProgramLauncher.Designer.cs">
+      <DependentUpon>ProgramLauncher.cs</DependentUpon>
     </Compile>
     <Compile Include="WordList.cs">
       <SubType>Form</SubType>
@@ -61,8 +61,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="frmProgramLauncher.resx">
-      <DependentUpon>frmProgramLauncher.cs</DependentUpon>
+    <EmbeddedResource Include="ProgramLauncher.resx">
+      <DependentUpon>ProgramLauncher.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WordList.resx">
       <DependentUpon>WordList.cs</DependentUpon>
