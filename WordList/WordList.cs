@@ -9,40 +9,40 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApplication1
 {
-    public partial class Form2 : Form
+    public partial class frmWordList : Form
     {
         public List<string> files = new List<string>();
-        public Form2()
+        public frmWordList()
         {
             InitializeComponent();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void btnEmail_Click(object sender, EventArgs e)
         {
-            if (!textBox1.Text.Contains("@"))
-                textBox1.Text += @" @";
+            if (!txtWhiteList.Text.Contains("@"))
+                txtWhiteList.Text += @" @";
 
-            if (!textBox1.Text.Contains("."))
-                textBox1.Text += @" .";
+            if (!txtWhiteList.Text.Contains("."))
+                txtWhiteList.Text += @" .";
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void btnHythen_Click(object sender, EventArgs e)
         {
-            if (!textBox1.Text.Contains("-"))
-                textBox1.Text += @" -";
+            if (!txtWhiteList.Text.Contains("-"))
+                txtWhiteList.Text += @" -";
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void btnTime_Click(object sender, EventArgs e)
         {
-            if (!textBox1.Text.Contains(":"))
-                textBox1.Text += @" :";
+            if (!txtWhiteList.Text.Contains(":"))
+                txtWhiteList.Text += @" :";
         }
 
         private void Form2_Load(object sender, EventArgs e)
         {
-            listBox1.AllowDrop = true;
-            listBox1.DragDrop += lbDragDrop;
-            listBox1.DragEnter += lbDragEnter;
+            lbFiles.AllowDrop = true;
+            lbFiles.DragDrop += lbDragDrop;
+            lbFiles.DragEnter += lbDragEnter;
         }
         private static void lbDragEnter(object sender, DragEventArgs e)
         {
@@ -53,21 +53,21 @@ namespace WindowsFormsApplication1
         private void lbDragDrop(object sender, DragEventArgs e)
         {
             files.AddRange((string[]) e.Data.GetData(DataFormats.FileDrop));
-            foreach (var file in files.Where(file => !listBox1.Items.Contains(file)))
-                listBox1.Items.Add(file);
-            label3.Text = listBox1.Items.Count + @" Files to Use";
+            foreach (var file in files.Where(file => !lbFiles.Items.Contains(file)))
+                lbFiles.Items.Add(file);
+            lblFiles.Text = lbFiles.Items.Count + @" Files to Use";
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void btnWordList_Click(object sender, EventArgs e)
         {
-            if (listBox1.Items.Count <= 0)
+            if (lbFiles.Items.Count <= 0)
             {
                 MessageBox.Show(@"Please add files before clicking this button");
                 return;
             }
             files = files.Distinct().ToList();
             ButtonSwap(true);
-            var punctuation = textBox1.Text;
+            var punctuation = txtWhiteList.Text;
             var count = 1;
             var word = new List<string>();
             var duplicate = new List<int>();
@@ -158,11 +158,11 @@ namespace WindowsFormsApplication1
                     }
                 }
 
-                listBox2.Items.Add("Currently on file " + count + " of " + files.Count);
+                lbOutput.Items.Add("Currently on file " + count + " of " + files.Count);
                 count++;
             }
 
-            listBox2.Items.Add("Currently creating the WordList file please wait.");
+            lbOutput.Items.Add("Currently creating the WordList file please wait.");
             var sfd = new SaveFileDialog
             {
                 Filter = @"Text File|*.txt",
@@ -182,10 +182,10 @@ namespace WindowsFormsApplication1
                     newfile.WriteLine(word[i] + " " + duplicate[i]);
             }
             ButtonSwap(false);
-            listBox2.Items.Clear();
-            listBox1.Items.Clear();
-            label3.Text = @"Files to Use";
-            textBox1.Text = "";
+            lbOutput.Items.Clear();
+            lbFiles.Items.Clear();
+            lblFiles.Text = @"Files to Use";
+            txtWhiteList.Text = "";
             files.Clear();
         }
 
@@ -220,17 +220,17 @@ namespace WindowsFormsApplication1
 
         private void ButtonSwap(bool start)
         {
-            button4.Enabled = !start;
-            listBox2.Enabled = !start;
-            listBox2.Visible = start;
-            label4.Visible = start;
+            btnWordList.Enabled = !start;
+            lbOutput.Enabled = !start;
+            lbOutput.Visible = start;
+            lblOutput.Visible = start;
         }
 
-        private void button5_Click(object sender, EventArgs e)
+        private void btnCurrentDir_Click(object sender, EventArgs e)
         {
             files.AddRange(Directory.GetFiles(Environment.CurrentDirectory, "*.txt"));
-            foreach (var file in files.Where(file => !listBox1.Items.Contains(file)))
-                listBox1.Items.Add(file);
+            foreach (var file in files.Where(file => !lbFiles.Items.Contains(file)))
+                lbFiles.Items.Add(file);
         }
     }
 }
