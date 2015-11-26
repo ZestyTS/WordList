@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsApplication1
 {
-    partial class Form1
+    partial class frmProgramLauncher
     {
         /// <summary>
         /// Required designer variable.
@@ -28,26 +28,26 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnWordList = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // button1
+            // btnWordList
             // 
-            this.button1.Location = new System.Drawing.Point(59, 35);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(156, 95);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "WordList";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.btnWordList.Location = new System.Drawing.Point(59, 35);
+            this.btnWordList.Name = "btnWordList";
+            this.btnWordList.Size = new System.Drawing.Size(156, 95);
+            this.btnWordList.TabIndex = 0;
+            this.btnWordList.Text = "WordList";
+            this.btnWordList.UseVisualStyleBackColor = true;
+            this.btnWordList.Click += new System.EventHandler(this.button1_Click);
             // 
-            // Form1
+            // frmProgramLauncher
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 261);
-            this.Controls.Add(this.button1);
-            this.Name = "Form1";
+            this.Controls.Add(this.btnWordList);
+            this.Name = "frmProgramLauncher";
             this.Text = "Program Launcher";
             this.ResumeLayout(false);
 
@@ -55,7 +55,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnWordList;
     }
 }
 
