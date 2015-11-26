@@ -175,7 +175,7 @@
             this.Controls.Add(this.lblDesc);
             this.Name = "frmWordList";
             this.Text = "WordList";
-            this.Load += new System.EventHandler(this.Form2_Load);
+            this.Load += new System.EventHandler(this.frmWordList_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
