@@ -6,15 +6,26 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Threading;
+using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace WindowsFormsApplication1
 {
     public partial class frmWordList : Form
     {
+        BackgroundWorker bw = new BackgroundWorker();
+
         public List<string> files = new List<string>();
         public frmWordList()
         {
             InitializeComponent();
+
+            bw.WorkerReportsProgress = true;
+            bw.WorkerSupportsCancellation = true;
+            bw.DoWork += new DoWorkEventHandler(bw_DoWork);
+            bw.ProgressChanged += new ProgressChangedEventHandler(bw_ProgressChanged);
+            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
         }
 
         //Emails have "@" and "." in them
@@ -64,162 +75,182 @@ namespace WindowsFormsApplication1
 
         private void btnWordList_Click(object sender, EventArgs e)
         {
-            if (lbFiles.Items.Count <= 0)
-            {
-                MessageBox.Show(@"Please add files before clicking this button");
-                return;
-            }
-            //in case a duplicate snuck in, I'm secretly removing it here
-            files = files.Distinct().ToList();
-
-            //stopping buttons that would break the program
-            ButtonSwap(true);
-
-            var punctuation = txtWhiteList.Text;
-            var count = 1;
-
-            //stores all the words
-            var word = new List<string>();
-
-            //stores how many time a word appears in the same index as List<string> word
-            var duplicate = new List<int>();
-
-            foreach (var file in files)
-            {
-                string all;
-                using (var sr = new StreamReader(file))
+            try {
+                if (lbFiles.Items.Count <= 0)
                 {
-                    all = sr.ReadToEnd().ToLower();
+                    MessageBox.Show(@"Please add files before clicking this button");
+                    return;
                 }
-                //making everything in the file human readable for string manipulation
-                all = DecodeQuotedPrintables(all);
+                //in case a duplicate snuck in, I'm secretly removing it here
+                files = files.Distinct().ToList();
 
-                //if nothing is put into the whitelist textbox, then I'm just removing all forms of non digits and non letters
-                if (string.IsNullOrEmpty(punctuation))
-                    all = new string(all.Where(c => !char.IsPunctuation(c)).ToArray()).Replace("<", "").Replace(">", "");
+                //stopping buttons that would break the program
+                ButtonSwap(true);
 
-                else
+                var punctuation = txtWhiteList.Text;
+                var count = 1;
+
+                //stores all the words
+                var word = new List<string>();
+
+                //stores how many time a word appears in the same index as List<string> word
+                var duplicate = new List<int>();
+
+                foreach (var file in files)
                 {
-                    var sb = new StringBuilder();
-                    var counthelper = 0;
-                    foreach (var c in all)
+                    string all = String.Empty;
+
+                    // ThreadPool.QueueUserWorkItem(new WaitCallback( someFunc(file, all, punctuation ));
+
+                    if (bw.IsBusy != true)
                     {
-                        counthelper++;
-                        if (punctuation.Contains(c))
+                        bw.RunWorkerAsync();
+                        someFunc(file, all, punctuation);
+                    }
+                    
+
+                    var temp = Regex.Split(all, @"\s+");
+
+                    for (var i = 0; i < temp.Length; i++)
+                    {
+                        //removing all the punctuation
+                        temp[i] = temp[i].TrimEnd('.');
+                        temp[i] = temp[i].TrimEnd('?');
+                        temp[i] = temp[i].TrimEnd(',');
+                        temp[i] = temp[i].TrimEnd('!');
+
+                        //making sure I'm only removing < or > if they aren't part of the word
+                        if (temp[i].Contains("<"))
                         {
-                            if (punctuation.Contains("."))
+                            if (!temp[i].Contains(">"))
+                                temp[i] = temp[i].Replace("<", "");
+                        }
+                        else if (temp[i].Contains(">"))
+                        {
+                            if (!temp[i].Contains("<"))
+                                temp[i] = temp[i].Replace(">", "");
+                        }
+
+                        //after removing all that stuff, I might have an empty string, so I just skip to next iteration
+                        if (temp[i] == "")
+                            continue;
+
+                        //first word
+                        if (word.Count == 0)
+                        {
+                            word.Add(temp[i]);
+                            duplicate.Add(1);
+                        }
+                        //duplicate++
+                        else if (word.Contains(temp[i]))
+                        {
+                            duplicate[word.IndexOf(temp[i])]++;
+                        }
+                        //new word found
+                        else
+                        {
+                            word.Add(temp[i]);
+                            duplicate.Add(1);
+                        }
+                    }
+
+                    //showing the user what file it's on so they know it's still running
+                    lbOutput.Items.Add("Currently on file " + count + " of " + files.Count);
+                    count++;
+                }
+
+                lbOutput.Items.Add("Currently creating the WordList file please wait.");
+
+                //pops up a file dialog so the user can save
+                var sfd = new SaveFileDialog
+                {
+                    Filter = @"Text File|*.txt",
+                    Title = @"Save the WordList File"
+                };
+                sfd.ShowDialog();
+
+                string location;
+                //in case the user doesn't care, I save the file at the location of the program
+                if (string.IsNullOrEmpty(sfd.FileName))
+                    location = Environment.CurrentDirectory + "/WordList.txt";
+                else
+                    location = sfd.FileName;
+
+                using (var newfile = new StreamWriter(location))
+                {
+                    for (var i = 0; i < word.Count; i++)
+                        newfile.WriteLine(word[i] + " " + duplicate[i]);
+                }
+
+                //resetting everything
+                ButtonSwap(false);
+                lbOutput.Items.Clear();
+                lbFiles.Items.Clear();
+                lblFiles.Text = @"Files to Use";
+                txtWhiteList.Text = "";
+                files.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + ": " + ex.InnerException);
+            }
+        }
+
+        private static void someFunc(string file, string all, string punctuation)
+        {
+            using (var sr = new StreamReader(file))
+            {
+                all = sr.ReadToEnd().ToLower();
+            }
+            //making everything in the file human readable for string manipulation
+            all = DecodeQuotedPrintables(all);
+
+            //if nothing is put into the whitelist textbox, then I'm just removing all forms of non digits and non letters
+            if (string.IsNullOrEmpty(punctuation))
+                all = new string(all.Where(c => !char.IsPunctuation(c)).ToArray()).Replace("<", "").Replace(">", "");
+
+            else
+            {
+                var sb = new StringBuilder();
+                var counthelper = 0;
+                foreach (var c in all)
+                {
+                    counthelper++;
+                    if (punctuation.Contains(c))
+                    {
+                        if (punctuation.Contains("."))
+                        {
+                            //making sure the "." isn't the last part of the word and only part of an email address
+                            if ((counthelper != all.Length && counthelper < all.Length) &&
+                                !string.IsNullOrEmpty(all[all.IndexOf(sb.ToString()) + 2].ToString()))
                             {
-                                //making sure the "." isn't the last part of the word and only part of an email address
-                                if ((counthelper != all.Length && counthelper < all.Length) &&
-                                    !string.IsNullOrEmpty(all[all.IndexOf(sb.ToString()) + 2].ToString()))
-                                {
-                                    sb.Append(c);
-                                }
-                                else if (punctuation.Contains("@"))
-                                {
-                                    var reverse = sb.ToString().ToArray();
-                                    Array.Reverse(reverse);
-
-                                    //checking if the @ sign is part of a single word, aka an email address
-                                    if (reverse.ToString().IndexOf("@") < reverse.ToString().IndexOf(" "))
-                                        sb.Append(c);
-                                }
-
-                            }
-                            else
                                 sb.Append(c);
+                            }
+                            else if (punctuation.Contains("@"))
+                            {
+                                var reverse = sb.ToString().ToArray();
+                                Array.Reverse(reverse);
+
+                                //checking if the @ sign is part of a single word, aka an email address
+                                if (reverse.ToString().IndexOf("@") < reverse.ToString().IndexOf(" "))
+                                    sb.Append(c);
+                            }
 
                         }
-                        //I've seen these in a lot of email headers, so I'm just manually removing them
-                        else if (c.ToString() == "<" || c.ToString() == ">")
-                        { }
-
-                        else if (!char.IsPunctuation(c))
+                        else
                             sb.Append(c);
 
                     }
-                    all = sb.ToString();
+                    //I've seen these in a lot of email headers, so I'm just manually removing them
+                    else if (c.ToString() == "<" || c.ToString() == ">")
+                    { }
+
+                    else if (!char.IsPunctuation(c))
+                        sb.Append(c);
+
                 }
-                var temp = Regex.Split(all, @"\s+");
-
-                for (var i = 0; i < temp.Length; i++)
-                {
-                    //removing all the punctuation
-                    temp[i] = temp[i].TrimEnd('.');
-                    temp[i] = temp[i].TrimEnd('?');
-                    temp[i] = temp[i].TrimEnd(',');
-                    temp[i] = temp[i].TrimEnd('!');
-
-                    //making sure I'm only removing < or > if they aren't part of the word
-                    if (temp[i].Contains("<"))
-                    {
-                        if (!temp[i].Contains(">"))
-                            temp[i] = temp[i].Replace("<", "");
-                    }
-                    else if (temp[i].Contains(">"))
-                    {
-                        if (!temp[i].Contains("<"))
-                            temp[i] = temp[i].Replace(">", "");
-                    }
-
-                    //after removing all that stuff, I might have an empty string, so I just skip to next iteration
-                    if (temp[i] == "")
-                        continue;
-
-                    //first word
-                    if (word.Count == 0)
-                    {
-                        word.Add(temp[i]);
-                        duplicate.Add(1);
-                    }
-                    //duplicate++
-                    else if (word.Contains(temp[i]))
-                    {
-                        duplicate[word.IndexOf(temp[i])]++;
-                    }
-                    //new word found
-                    else
-                    {
-                        word.Add(temp[i]);
-                        duplicate.Add(1);
-                    }
-                }
-
-                //showing the user what file it's on so they know it's still running
-                lbOutput.Items.Add("Currently on file " + count + " of " + files.Count);
-                count++;
+                all = sb.ToString();
             }
-
-            lbOutput.Items.Add("Currently creating the WordList file please wait.");
-
-            //pops up a file dialog so the user can save
-            var sfd = new SaveFileDialog
-            {
-                Filter = @"Text File|*.txt",
-                Title = @"Save the WordList File"
-            };
-            sfd.ShowDialog();
-
-            string location;
-            //in case the user doesn't care, I save the file at the location of the program
-            if (string.IsNullOrEmpty(sfd.FileName))
-                location = Environment.CurrentDirectory + "/WordList.txt";
-            else
-                location = sfd.FileName;
-
-            using (var newfile = new StreamWriter(location))
-            {
-                for (var i = 0; i < word.Count; i++)
-                    newfile.WriteLine(word[i] + " " + duplicate[i]);
-            }
-
-            //resetting everything
-            ButtonSwap(false);
-            lbOutput.Items.Clear();
-            lbFiles.Items.Clear();
-            lblFiles.Text = @"Files to Use";
-            txtWhiteList.Text = "";
-            files.Clear();
         }
 
         //Emails are encoded, so I'm decoding them here
