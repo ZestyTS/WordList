@@ -1,6 +1,6 @@
-﻿namespace WindowsFormsApplication1
+﻿namespace WordList
 {
-    partial class frmWordList
+    partial class FrmWordList
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmWordList));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmWordList));
             this.lblDesc = new System.Windows.Forms.Label();
             this.lbFiles = new System.Windows.Forms.ListBox();
             this.lblFiles = new System.Windows.Forms.Label();
@@ -146,7 +146,7 @@
             this.btnCurrentDir.UseVisualStyleBackColor = true;
             this.btnCurrentDir.Click += new System.EventHandler(this.btnCurrentDir_Click);
             // 
-            // frmWordList
+            // FrmWordList
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -162,7 +162,7 @@
             this.Controls.Add(this.lblFiles);
             this.Controls.Add(this.lbFiles);
             this.Controls.Add(this.lblDesc);
-            this.Name = "frmWordList";
+            this.Name = "FrmWordList";
             this.Text = "WordList";
             this.Load += new System.EventHandler(this.frmWordList_Load);
             this.ResumeLayout(false);

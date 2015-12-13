@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using WordList;
 
 namespace WindowsFormsApplication1
 {
@@ -19,7 +20,7 @@ namespace WindowsFormsApplication1
         {
             BeginInvoke(new MethodInvoker(delegate
             {
-                var WordList = new frmWordList();
+                var WordList = new FrmWordList();
                 WordList.Show();
                 Hide();
             }));             

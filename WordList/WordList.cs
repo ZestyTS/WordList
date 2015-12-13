@@ -1,37 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Threading;
-using System.Threading.Tasks;
-using System.ComponentModel;
 
-namespace WindowsFormsApplication1
+namespace WordList
 {
-    public partial class frmWordList : Form
+    public partial class FrmWordList : Form
     {
-        BackgroundWorker bw = new BackgroundWorker();
+        private readonly BackgroundWorker _bw = new BackgroundWorker();
 
         //stores all the words
-        List<String> word = new List<string>();
+        private readonly List<string> _word = new List<string>();
 
-        //stores how many time a word appears in the same index as List<string> word
-        List<int> duplicate = new List<int>();
+        //stores how many time a _word appears in the same index as List<string> _word
+        private readonly List<int> _duplicate = new List<int>();
 
-        public List<string> files = new List<string>();
-        public frmWordList()
+        public List<string> Files = new List<string>();
+        public FrmWordList()
         {
             InitializeComponent();
 
-            bw.WorkerReportsProgress = true;
-            bw.WorkerSupportsCancellation = true;
-            bw.DoWork += new DoWorkEventHandler(btnWordList_Work);
-            bw.ProgressChanged += new ProgressChangedEventHandler(progressUpdate);
-            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(workerCompleted);
+            _bw.WorkerReportsProgress = true;
+            _bw.WorkerSupportsCancellation = true;
+            _bw.DoWork += btnWordList_Work;
+            _bw.ProgressChanged += ProgressUpdate;
+            _bw.RunWorkerCompleted += WorkerCompleted;
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -41,15 +39,13 @@ namespace WindowsFormsApplication1
             if (e.CloseReason == CloseReason.WindowsShutDown) return;
 
             // Confirm user wants to close
-            switch (MessageBox.Show(this, "Are you sure you want to close?", "Closing", MessageBoxButtons.YesNo))
+            switch (MessageBox.Show(this, @"Are you sure you want to close?", @"Closing", MessageBoxButtons.YesNo))
             {
                 case DialogResult.No:
                     e.Cancel = true;
                     break;
                 case DialogResult.Yes:
                     Application.Exit();
-                    break;
-                default:
                     break;
             }
         }
@@ -79,47 +75,47 @@ namespace WindowsFormsApplication1
         private void frmWordList_Load(object sender, EventArgs e)
         {
             lbFiles.AllowDrop = true;
-            lbFiles.DragDrop += lbDragDrop;
-            lbFiles.DragEnter += lbDragEnter;
+            lbFiles.DragDrop += LbDragDrop;
+            lbFiles.DragEnter += LbDragEnter;
         }
-        private static void lbDragEnter(object sender, DragEventArgs e)
+        private static void LbDragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
                 e.Effect = DragDropEffects.Copy;
         }
 
-        private void workerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void WorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if(!(e.Error == null))
+            if(e.Error != null)
             {
-                lblOutput.Text = "Error: " + e.Error.Message + ": " + e.Error.InnerException;
+                lblOutput.Text = @"Error: " + e.Error.Message + @": " + e.Error.InnerException;
             }
             else
             {
-                lblOutput.Text = "DONE!";
-                showSaveDialog();
+                lblOutput.Text = @"DONE!";
+                ShowSaveDialog();
             }
         }
 
-        private void lbDragDrop(object sender, DragEventArgs e)
+        private void LbDragDrop(object sender, DragEventArgs e)
         {
-            //adds all the files into the List<string> files
-            files.AddRange((string[]) e.Data.GetData(DataFormats.FileDrop));
+            //adds all the Files into the List<string> Files
+            Files.AddRange((string[]) e.Data.GetData(DataFormats.FileDrop));
 
-            //checks if a file is a duplicate before adding it to lbFiles
-            foreach (var file in files.Where(file => !lbFiles.Items.Contains(file)))
+            //checks if a file is a _duplicate before adding it to lbFiles
+            foreach (var file in Files.Where(file => !lbFiles.Items.Contains(file)))
                 lbFiles.Items.Add(file);
             lblFiles.Text = lbFiles.Items.Count + @" Files to Use";
         }
 
         private void btnWordList_Click(object sender, EventArgs e)
         {
-            if (bw.IsBusy != true)
-            {
-                //stopping buttons that would break the program
-                ButtonSwap(true);
-                bw.RunWorkerAsync();
-            }
+            if (_bw.IsBusy)
+                return;
+
+            //stopping buttons that would break the program
+            ButtonSwap(true);
+            _bw.RunWorkerAsync();
         }
 
         private void btnWordList_Work(object sender, EventArgs e)
@@ -127,23 +123,75 @@ namespace WindowsFormsApplication1
             try {
                 if (lbFiles.Items.Count <= 0)
                 {
-                    MessageBox.Show(@"Please add files before clicking this button");
+                    MessageBox.Show(@"Please add Files before clicking this button");
                     return;
                 }
 
-                BackgroundWorker worker = sender as BackgroundWorker;
+                var worker = sender as BackgroundWorker;
 
-                //in case a duplicate snuck in, I'm secretly removing it here
-                files = files.Distinct().ToList();
+                //in case a _duplicate snuck in, I'm secretly removing it here
+                Files = Files.Distinct().ToList();
 
                 var punctuation = txtWhiteList.Text;
                 var count = 1;
 
-                foreach (var file in files)
+                foreach (var file in Files)
                 {
-                    string all = String.Empty;
+                    string all;
 
-                    someFunc(file, all, punctuation);
+                    using (var sr = new StreamReader(file))
+                    {
+                        all = sr.ReadToEnd().ToLower();
+                    }
+                    //making everything in the file human readable for string manipulation
+                    all = DecodeQuotedPrintables(all);
+
+                    //if nothing is put into the whitelist textbox, then I'm just removing all forms of non digits and non letters
+                    if (string.IsNullOrEmpty(punctuation))
+                        all = new string(all.Where(c => !char.IsPunctuation(c)).ToArray()).Replace("<", "").Replace(">", "");
+
+                    else
+                    {
+                        var sb = new StringBuilder();
+                        var counthelper = 0;
+                        foreach (var c in all)
+                        {
+                            counthelper++;
+                            if (punctuation.Contains(c))
+                            {
+                                if (punctuation.Contains("."))
+                                {
+                                    //making sure the "." isn't the last part of the _word and only part of an email address
+                                    if ((counthelper != all.Length && counthelper < all.Length) &&
+                                        !string.IsNullOrEmpty(all[all.IndexOf(sb.ToString()) + 2].ToString()))
+                                    {
+                                        sb.Append(c);
+                                    }
+                                    else if (punctuation.Contains("@"))
+                                    {
+                                        var reverse = sb.ToString().ToArray();
+                                        Array.Reverse(reverse);
+
+                                        //checking if the @ sign is part of a single _word, aka an email address
+                                        if (reverse.ToString().IndexOf("@") < reverse.ToString().IndexOf(" "))
+                                            sb.Append(c);
+                                    }
+
+                                }
+                                else
+                                    sb.Append(c);
+
+                            }
+                            //I've seen these in a lot of email headers, so I'm just manually removing them
+                            else if (c.ToString() == "<" || c.ToString() == ">")
+                            { }
+
+                            else if (!char.IsPunctuation(c))
+                                sb.Append(c);
+
+                        }
+                        all = sb.ToString();
+                    }
 
                     var temp = Regex.Split(all, @"\s+");
 
@@ -155,7 +203,7 @@ namespace WindowsFormsApplication1
                         temp[i] = temp[i].TrimEnd(',');
                         temp[i] = temp[i].TrimEnd('!');
 
-                        //making sure I'm only removing < or > if they aren't part of the word
+                        //making sure I'm only removing < or > if they aren't part of the _word
                         if (temp[i].Contains("<"))
                         {
                             if (!temp[i].Contains(">"))
@@ -171,29 +219,29 @@ namespace WindowsFormsApplication1
                         if (temp[i] == "")
                             continue;
 
-                        //first word
-                        if (word.Count == 0)
+                        //first _word
+                        if (_word.Count == 0)
                         {
-                            word.Add(temp[i]);
-                            duplicate.Add(1);
+                            _word.Add(temp[i]);
+                            _duplicate.Add(1);
                         }
-                        //duplicate++
-                        else if (word.Contains(temp[i]))
+                        //_duplicate++
+                        else if (_word.Contains(temp[i]))
                         {
-                            duplicate[word.IndexOf(temp[i])]++;
+                            _duplicate[_word.IndexOf(temp[i])]++;
                         }
-                        //new word found
+                        //new _word found
                         else
                         {
-                            word.Add(temp[i]);
-                            duplicate.Add(1);
+                            _word.Add(temp[i]);
+                            _duplicate.Add(1);
                         }
                     }
 
                     //showing the user what file it's on so they know it's still running
                     count++;
 
-                    worker.ReportProgress(count*100/files.Count);
+                    worker?.ReportProgress(count*100/Files.Count);
                 }
 
                 //here was saving, plus those 2 lists were at the top before the first for each
@@ -203,15 +251,15 @@ namespace WindowsFormsApplication1
                 //lbFiles.Items.Clear();
                 //lblFiles.Text = @"Files to Use";
                 //txtWhiteList.Text = "";
-                files.Clear();
+                Files.Clear();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message + ": " + ex.InnerException);
+                MessageBox.Show(ex.Message + @": " + ex.InnerException);
             }
         }
 
-        public void showSaveDialog()
+        public void ShowSaveDialog()
         {
             //pops up a file dialog so the user can save
             var sfd = new SaveFileDialog
@@ -228,78 +276,16 @@ namespace WindowsFormsApplication1
             else
                 location = sfd.FileName;
 
-            //word.Add("asdfsafsafsdf");//TEST
-
             using (var newfile = new StreamWriter(location))
             {
-                for (int i = 0; i < word.Count; i++)
-                    newfile.WriteLine(word[i] + " " + duplicate[i]);
-                //newfile.WriteLine("test again");
+                for (var i = 0; i < _word.Count; i++)
+                    newfile.WriteLine(_word[i] + " " + _duplicate[i]);
             }
         }
 
-        private void progressUpdate(object sender, ProgressChangedEventArgs e)
+        private void ProgressUpdate(object sender, ProgressChangedEventArgs e)
         {
-            lblOutput.Text = e.ProgressPercentage.ToString() + "%";
-        }
-
-        //the function that does some stuff
-        private static Object someFunc(string file, string all, string punctuation)
-        {
-            using (var sr = new StreamReader(file))
-            {
-                all = sr.ReadToEnd().ToLower();
-            }
-            //making everything in the file human readable for string manipulation
-            all = DecodeQuotedPrintables(all);
-
-            //if nothing is put into the whitelist textbox, then I'm just removing all forms of non digits and non letters
-            if (string.IsNullOrEmpty(punctuation))
-                all = new string(all.Where(c => !char.IsPunctuation(c)).ToArray()).Replace("<", "").Replace(">", "");
-
-            else
-            {
-                var sb = new StringBuilder();
-                var counthelper = 0;
-                foreach (var c in all)
-                {
-                    counthelper++;
-                    if (punctuation.Contains(c))
-                    {
-                        if (punctuation.Contains("."))
-                        {
-                            //making sure the "." isn't the last part of the word and only part of an email address
-                            if ((counthelper != all.Length && counthelper < all.Length) &&
-                                !string.IsNullOrEmpty(all[all.IndexOf(sb.ToString()) + 2].ToString()))
-                            {
-                                sb.Append(c);
-                            }
-                            else if (punctuation.Contains("@"))
-                            {
-                                var reverse = sb.ToString().ToArray();
-                                Array.Reverse(reverse);
-
-                                //checking if the @ sign is part of a single word, aka an email address
-                                if (reverse.ToString().IndexOf("@") < reverse.ToString().IndexOf(" "))
-                                    sb.Append(c);
-                            }
-
-                        }
-                        else
-                            sb.Append(c);
-
-                    }
-                    //I've seen these in a lot of email headers, so I'm just manually removing them
-                    else if (c.ToString() == "<" || c.ToString() == ">")
-                    { }
-
-                    else if (!char.IsPunctuation(c))
-                        sb.Append(c);
-
-                }
-                all = sb.ToString();
-            }
-            return null;
+            lblOutput.Text = e.ProgressPercentage + @"%";
         }
 
         //Emails are encoded, so I'm decoding them here
@@ -344,11 +330,11 @@ namespace WindowsFormsApplication1
 
         private void btnCurrentDir_Click(object sender, EventArgs e)
         {
-            //grabs all the .txt files in the program's current directory
-            files.AddRange(Directory.GetFiles(Environment.CurrentDirectory, "*.txt"));
+            //grabs all the .txt Files in the program's current directory
+            Files.AddRange(Directory.GetFiles(Environment.CurrentDirectory, "*.txt"));
 
-            //checks if a file is a duplicate, if not adds it to lbFiles
-            foreach (var file in files.Where(file => !lbFiles.Items.Contains(file)))
+            //checks if a file is a _duplicate, if not adds it to lbFiles
+            foreach (var file in Files.Where(file => !lbFiles.Items.Contains(file)))
                 lbFiles.Items.Add(file);
         }
     }
