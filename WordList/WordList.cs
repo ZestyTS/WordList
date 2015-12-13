@@ -16,6 +16,12 @@ namespace WindowsFormsApplication1
     {
         BackgroundWorker bw = new BackgroundWorker();
 
+        //stores all the words
+        List<String> word = new List<string>();
+
+        //stores how many time a word appears in the same index as List<string> word
+        List<int> duplicate = new List<int>();
+
         public List<string> files = new List<string>();
         public frmWordList()
         {
@@ -23,9 +29,9 @@ namespace WindowsFormsApplication1
 
             bw.WorkerReportsProgress = true;
             bw.WorkerSupportsCancellation = true;
-            bw.DoWork += new DoWorkEventHandler(bw_DoWork);
-            bw.ProgressChanged += new ProgressChangedEventHandler(bw_ProgressChanged);
-            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+            bw.DoWork += new DoWorkEventHandler(btnWordList_Work);
+            bw.ProgressChanged += new ProgressChangedEventHandler(progressUpdate);
+            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(workerCompleted);
         }
 
         //Emails have "@" and "." in them
@@ -62,6 +68,19 @@ namespace WindowsFormsApplication1
                 e.Effect = DragDropEffects.Copy;
         }
 
+        private void workerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if(!(e.Error == null))
+            {
+                lblOutput.Text = "Error: " + e.Error.Message + ": " + e.Error.InnerException;
+            }
+            else
+            {
+                lblOutput.Text = "DONE!";
+                showSaveDialog();
+            }
+        }
+
         private void lbDragDrop(object sender, DragEventArgs e)
         {
             //adds all the files into the List<string> files
@@ -75,39 +94,36 @@ namespace WindowsFormsApplication1
 
         private void btnWordList_Click(object sender, EventArgs e)
         {
+            if (bw.IsBusy != true)
+            {
+                //stopping buttons that would break the program
+                ButtonSwap(true);
+                bw.RunWorkerAsync();
+            }
+        }
+
+        private void btnWordList_Work(object sender, EventArgs e)
+        {
             try {
                 if (lbFiles.Items.Count <= 0)
                 {
                     MessageBox.Show(@"Please add files before clicking this button");
                     return;
                 }
+
+                BackgroundWorker worker = sender as BackgroundWorker;
+
                 //in case a duplicate snuck in, I'm secretly removing it here
                 files = files.Distinct().ToList();
 
-                //stopping buttons that would break the program
-                ButtonSwap(true);
-
                 var punctuation = txtWhiteList.Text;
                 var count = 1;
-
-                //stores all the words
-                var word = new List<string>();
-
-                //stores how many time a word appears in the same index as List<string> word
-                var duplicate = new List<int>();
 
                 foreach (var file in files)
                 {
                     string all = String.Empty;
 
-                    // ThreadPool.QueueUserWorkItem(new WaitCallback( someFunc(file, all, punctuation ));
-
-                    if (bw.IsBusy != true)
-                    {
-                        bw.RunWorkerAsync();
-                        someFunc(file, all, punctuation);
-                    }
-                    
+                    someFunc(file, all, punctuation);
 
                     var temp = Regex.Split(all, @"\s+");
 
@@ -155,39 +171,18 @@ namespace WindowsFormsApplication1
                     }
 
                     //showing the user what file it's on so they know it's still running
-                    lbOutput.Items.Add("Currently on file " + count + " of " + files.Count);
                     count++;
+
+                    worker.ReportProgress(count -1); //lol lazy
                 }
 
-                lbOutput.Items.Add("Currently creating the WordList file please wait.");
-
-                //pops up a file dialog so the user can save
-                var sfd = new SaveFileDialog
-                {
-                    Filter = @"Text File|*.txt",
-                    Title = @"Save the WordList File"
-                };
-                sfd.ShowDialog();
-
-                string location;
-                //in case the user doesn't care, I save the file at the location of the program
-                if (string.IsNullOrEmpty(sfd.FileName))
-                    location = Environment.CurrentDirectory + "/WordList.txt";
-                else
-                    location = sfd.FileName;
-
-                using (var newfile = new StreamWriter(location))
-                {
-                    for (var i = 0; i < word.Count; i++)
-                        newfile.WriteLine(word[i] + " " + duplicate[i]);
-                }
+                //here was saving, plus those 2 lists were at the top before the first for each
 
                 //resetting everything
-                ButtonSwap(false);
-                lbOutput.Items.Clear();
-                lbFiles.Items.Clear();
-                lblFiles.Text = @"Files to Use";
-                txtWhiteList.Text = "";
+                //ButtonSwap(false);
+                //lbFiles.Items.Clear();
+                //lblFiles.Text = @"Files to Use";
+                //txtWhiteList.Text = "";
                 files.Clear();
             }
             catch (Exception ex)
@@ -196,7 +191,39 @@ namespace WindowsFormsApplication1
             }
         }
 
-        private static void someFunc(string file, string all, string punctuation)
+        public void showSaveDialog()
+        {
+            //pops up a file dialog so the user can save
+            var sfd = new SaveFileDialog
+            {
+                Filter = @"Text File|*.txt",
+                Title = @"Save the WordList File"
+            };
+            sfd.ShowDialog();
+
+            string location;
+            //in case the user doesn't care, I save the file at the location of the program
+            if (string.IsNullOrEmpty(sfd.FileName))
+                location = Environment.CurrentDirectory + "/WordList.txt";
+            else
+                location = sfd.FileName;
+
+            word.Add("asdfsafsafsdf");//TEST
+
+            using (var newfile = new StreamWriter(location))
+            {
+                for (int i = 0; i < word.Count; i++)
+                    newfile.WriteLine(word[i] + " " + duplicate[i]);
+            }
+        }
+
+        private void progressUpdate(object sender, ProgressChangedEventArgs e)
+        {
+            lblOutput.Text = e.ProgressPercentage.ToString() + "%";
+        }
+
+        //the function that does some stuff
+        private static Object someFunc(string file, string all, string punctuation)
         {
             using (var sr = new StreamReader(file))
             {
@@ -251,6 +278,7 @@ namespace WindowsFormsApplication1
                 }
                 all = sb.ToString();
             }
+            return null;
         }
 
         //Emails are encoded, so I'm decoding them here
@@ -290,8 +318,6 @@ namespace WindowsFormsApplication1
         {
             //Switching buttons on and off to not break program
             btnWordList.Enabled = !start;
-            lbOutput.Enabled = !start;
-            lbOutput.Visible = start;
             lblOutput.Visible = start;
         }
 

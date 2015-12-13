@@ -37,7 +37,6 @@
             this.btnEmail = new System.Windows.Forms.Button();
             this.btnHythen = new System.Windows.Forms.Button();
             this.btnTime = new System.Windows.Forms.Button();
-            this.lbOutput = new System.Windows.Forms.ListBox();
             this.btnWordList = new System.Windows.Forms.Button();
             this.lblOutput = new System.Windows.Forms.Label();
             this.btnCurrentDir = new System.Windows.Forms.Button();
@@ -115,16 +114,6 @@
             this.btnTime.UseVisualStyleBackColor = true;
             this.btnTime.Click += new System.EventHandler(this.btnTime_Click);
             // 
-            // lbOutput
-            // 
-            this.lbOutput.Enabled = false;
-            this.lbOutput.FormattingEnabled = true;
-            this.lbOutput.Location = new System.Drawing.Point(232, 418);
-            this.lbOutput.Name = "lbOutput";
-            this.lbOutput.Size = new System.Drawing.Size(306, 147);
-            this.lbOutput.TabIndex = 9;
-            this.lbOutput.Visible = false;
-            // 
             // btnWordList
             // 
             this.btnWordList.Location = new System.Drawing.Point(447, 256);
@@ -138,9 +127,10 @@
             // lblOutput
             // 
             this.lblOutput.AutoSize = true;
-            this.lblOutput.Location = new System.Drawing.Point(361, 402);
+            this.lblOutput.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lblOutput.Location = new System.Drawing.Point(310, 412);
             this.lblOutput.Name = "lblOutput";
-            this.lblOutput.Size = new System.Drawing.Size(39, 13);
+            this.lblOutput.Size = new System.Drawing.Size(96, 31);
             this.lblOutput.TabIndex = 11;
             this.lblOutput.Text = "Output";
             this.lblOutput.Visible = false;
@@ -164,7 +154,6 @@
             this.Controls.Add(this.btnCurrentDir);
             this.Controls.Add(this.lblOutput);
             this.Controls.Add(this.btnWordList);
-            this.Controls.Add(this.lbOutput);
             this.Controls.Add(this.btnTime);
             this.Controls.Add(this.btnHythen);
             this.Controls.Add(this.btnEmail);
@@ -191,7 +180,6 @@
         private System.Windows.Forms.Button btnEmail;
         private System.Windows.Forms.Button btnHythen;
         private System.Windows.Forms.Button btnTime;
-        private System.Windows.Forms.ListBox lbOutput;
         private System.Windows.Forms.Button btnWordList;
         private System.Windows.Forms.Label lblOutput;
         private System.Windows.Forms.Button btnCurrentDir;
