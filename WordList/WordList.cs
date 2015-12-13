@@ -34,6 +34,26 @@ namespace WindowsFormsApplication1
             bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(workerCompleted);
         }
 
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            if (e.CloseReason == CloseReason.WindowsShutDown) return;
+
+            // Confirm user wants to close
+            switch (MessageBox.Show(this, "Are you sure you want to close?", "Closing", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.No:
+                    e.Cancel = true;
+                    break;
+                case DialogResult.Yes:
+                    Application.Exit();
+                    break;
+                default:
+                    break;
+            }
+        }
+
         //Emails have "@" and "." in them
         private void btnEmail_Click(object sender, EventArgs e)
         {

@@ -12,9 +12,17 @@ namespace WindowsFormsApplication1
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var WordList = new frmWordList();
-            WordList.Show();
+            
+        }
 
+        private void frmProgramLauncher_Load(object sender, EventArgs e)
+        {
+            BeginInvoke(new MethodInvoker(delegate
+            {
+                var WordList = new frmWordList();
+                WordList.Show();
+                Hide();
+            }));             
         }
     }
 }
