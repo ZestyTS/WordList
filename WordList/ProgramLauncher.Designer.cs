@@ -1,6 +1,6 @@
-﻿namespace WindowsFormsApplication1
+﻿namespace WordList
 {
-    partial class frmProgramLauncher
+    partial class FrmProgramLauncher
     {
         /// <summary>
         /// Required designer variable.
@@ -41,13 +41,13 @@
             this.btnWordList.UseVisualStyleBackColor = true;
             this.btnWordList.Click += new System.EventHandler(this.button1_Click);
             // 
-            // frmProgramLauncher
+            // FrmProgramLauncher
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 261);
             this.Controls.Add(this.btnWordList);
-            this.Name = "frmProgramLauncher";
+            this.Name = "FrmProgramLauncher";
             this.Text = "Program Launcher";
             this.Load += new System.EventHandler(this.frmProgramLauncher_Load);
             this.ResumeLayout(false);

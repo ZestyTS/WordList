@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Windows.Forms;
-using WordList;
 
-namespace WindowsFormsApplication1
+namespace WordList
 {
-    public partial class frmProgramLauncher : Form
+    public partial class FrmProgramLauncher : Form
     {
-        public frmProgramLauncher()
+        public FrmProgramLauncher()
         {
             InitializeComponent();
         }
@@ -20,8 +19,8 @@ namespace WindowsFormsApplication1
         {
             BeginInvoke(new MethodInvoker(delegate
             {
-                var WordList = new FrmWordList();
-                WordList.Show();
+                var wordList = new FrmWordList();
+                wordList.Show();
                 Hide();
             }));             
         }
