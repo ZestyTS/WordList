@@ -49,6 +49,7 @@
             this.Controls.Add(this.btnWordList);
             this.Name = "frmProgramLauncher";
             this.Text = "Program Launcher";
+            this.Load += new System.EventHandler(this.frmProgramLauncher_Load);
             this.ResumeLayout(false);
 
         }
