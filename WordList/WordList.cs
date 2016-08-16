@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -243,6 +244,8 @@ namespace WordList
                     count++;
 
                     worker?.ReportProgress(count*100/Files.Count);
+                    GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                    GC.Collect();
                 }
 
                 //here was saving, plus those 2 lists were at the top before the first for each
